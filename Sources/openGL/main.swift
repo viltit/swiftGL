@@ -22,6 +22,8 @@ let window = try SDLWindow(
 var event = SDL_Event()
 var isRunning = true
 
+let shader = try Shader(vertexShaderPath: "", fragmentShaderPath: "")
+
 while isRunning {
     
     // TODO: First swap or first clear ??
