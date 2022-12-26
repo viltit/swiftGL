@@ -45,14 +45,26 @@ struct Triangle {
     }
 
     func draw(shader: Shader) {
-        print("Drawing triangle")
-        // TODO: use a model matrix for position and scale and push it to the shader
-
-        // draw...
-        // TODO Advanced: Draw same gemoetry with different model matrices at the same time
-        GL.glBindVertexArray(vao);
-        //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        GL.glDrawArrays(GL_TRIANGLES, 0, numVertices);
-        GL.glBindVertexArray(0);
+        do {
+            print("Drawing triangle")
+            // TODO: use a model matrix for position and scale and push it to the shader
+            let time = Date().timeIntervalSince1970
+            let green = (sin(time) / 2.0) + 0.5;
+            let red = (cos(time) / 2.0) + 0.5;
+            let uniform = try shader.uniform(name: "inColor")
+            GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
+            // draw...
+            // TODO Advanced: Draw same gemoetry with different model matrices at the same time
+            GL.glBindVertexArray(vao);
+            //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+            GL.glDrawArrays(GL_TRIANGLES, 0, numVertices);
+            GL.glBindVertexArray(0);
+            }
+        catch GLError.uniformNotFound(let uniform) {
+            print("Shader \(shader.name): Could not find uniform named \(uniform)")
+        }
+        catch {
+            // no other errors should be thrown here
+        }
     }
 }

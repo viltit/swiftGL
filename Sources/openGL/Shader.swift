@@ -5,13 +5,16 @@ import Foundation
 
 final class Shader {
 
+    let name: String  
+    
     private let programID: GLuint 
     private let vertexID: GLuint 
-    private let fragmentID: GLuint      
+    private let fragmentID: GLuint    
 
     // TODO: Second initializer with geometry and tesselation shader
-    init(sourceVertexCode: String, sourceFragmentCode: String) throws {
+    init(name: String, sourceVertexCode: String, sourceFragmentCode: String) throws {
 
+        self.name = name
         programID = try GL.glCreateProgram()
             .succeedOrThrow(error: .failedToCreateShaderProgram)
         vertexID = try GL.glCreateShader(GL_VERTEX_SHADER)
@@ -47,7 +50,7 @@ final class Shader {
         }
         let location = GL.glGetUniformLocation(programID, namePtr)
         guard location != -1 else {
-            throw GLError.uniformNotFound(uniform: name)
+            throw GLError.uniformNotFound(uniform: name, shaderName: name)
         }
         return location
     } 
@@ -74,7 +77,7 @@ final class Shader {
             let logCharPtr = UnsafeMutablePointer(mutating: [ CChar ](repeating: 0, count: Int(length)))
             GL.glGetShaderInfoLog(id, length, &length, logCharPtr)
 
-            throw GLError.shaderCompileError(log: String(cString: logCharPtr))
+            throw GLError.shaderCompileError(log: String(cString: logCharPtr), shaderName: name)
         }
     }
 
@@ -97,7 +100,7 @@ final class Shader {
             let logCharPtr = UnsafeMutablePointer(mutating: [ CChar ](repeating: 0, count: Int(length)))
             GL.glGetProgramInfoLog(programID, length, &length, logCharPtr)
             
-            throw GLError.shaderLinkingError(log: String(cString: logCharPtr))  
+            throw GLError.shaderLinkingError(log: String(cString: logCharPtr), shaderName: name)  
         }
     }
 }

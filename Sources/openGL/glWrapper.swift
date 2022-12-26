@@ -62,7 +62,7 @@ enum GL {
 enum GLError: Error {
     case failedToCreateShaderProgram
     case failedToCreateShader
-    case uniformNotFound(uniform: String /* TODO: Shader name ? */)
-    case shaderCompileError(log: String)
-    case shaderLinkingError(log: String)
+    case uniformNotFound(uniform: String, shaderName: String)
+    case shaderCompileError(log: String, shaderName: String)
+    case shaderLinkingError(log: String, shaderName: String)
 }

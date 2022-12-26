@@ -48,11 +48,12 @@ void main() {
 }
 """
 
-// TODO: First milestone: Use Triangle when drawing and generate some pattern
 do {
-    let shader = try Shader(sourceVertexCode: vertexShaderSource, sourceFragmentCode: fragmentShaderSource)
+    let shader = try Shader(
+        name: "Simple shader", 
+        sourceVertexCode: vertexShaderSource, 
+        sourceFragmentCode: fragmentShaderSource)
 
-    // TODO: wip
     let triangle = Triangle()
 
     gameLoop(shader: shader, triangle: triangle)
@@ -60,12 +61,12 @@ do {
     print("SDL2 quits now")
     SDL2.quit()
 }
-catch GLError.shaderLinkingError(let log) {
-    print(log)
+catch GLError.shaderLinkingError(let log, let shaderName) {
+    print("Shader named '\(shaderName)' error. Logfile: \n \(log)")
 
 }
-catch GLError.shaderCompileError(let log) {
-    print(log)
+catch GLError.shaderCompileError(let log, let shaderName) {
+    print("Shader named '\(shaderName)' error. Logfile: \n \(log)")
 }
 
 private func gameLoop(
@@ -77,7 +78,6 @@ private func gameLoop(
 
     while isRunning {
         
-        // TODO: First swap or first clear ??
         window.clear()
         
         // TODO: How can we avoid accessing CSDL directly ?
@@ -88,29 +88,26 @@ private func gameLoop(
             case SDL_WINDOWEVENT:
                 if event.window.event == UInt8(SDL_WINDOWEVENT_SIZE_CHANGED.rawValue) {
                     window.size = Size(width: event.window.data1, height: event.window.data2)
+                } 
+            // Keyboard events, TODO: Handle in its own class
+            case SDL_KEYDOWN:
+                switch(event.key.keysym.sym) {
+                    case Int32(SDLK_ESCAPE):    // TODO: And another ugly cast
+                        isRunning = false
+				break;
+                default:
+                    break
                 }
-            // TODO: Keyboard event    
             default:
                 break
         }
 
         do {
-            // TODO: Completly wip, just show we can do *something*
             shader.on()
-            let time = Date().timeIntervalSince1970
-            let green = (sin(time) / 2.0) + 0.5;
-            let red = (cos(time) / 2.0) + 0.5;
-            let uniform = try shader.uniform(name: "inColor")
-            GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
             triangle.draw(shader: shader)
             shader.off()
         }
-        catch GLError.uniformNotFound(let uniform) {
-            print("Could not find uniform named \(uniform)")
-        }
-        catch {
-            print(error)
-        }
+
         // TODO: Window needs a method to fetch displays native refresh rate (SDL_GetWindowDisplayMode)
         // TODO: Add timer and wait for next loop according to screens refresh rate
         window.swap()
