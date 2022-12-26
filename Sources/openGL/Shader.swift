@@ -18,10 +18,6 @@ final class Shader {
             .succeedOrThrow(error: .failedToCreateShader)
         fragmentID = try GL.glCreateShader(GL_FRAGMENT_SHADER)
             .succeedOrThrow(error: .failedToCreateShader)
-
-        print("programID: \(programID)")
-        print("vertexID: \(vertexID)")
-        print("fragmentID: \(fragmentID)")
         
         try compile(source: sourceVertexCode, shader: vertexID)
         try compile(source: sourceFragmentCode, shader: fragmentID)
@@ -50,7 +46,7 @@ final class Shader {
             fatalError(/* TODO */)
         }
         let location = GL.glGetUniformLocation(programID, namePtr)
-        guard location != GL_INVALID_INDEX else {
+        guard location != -1 else {
             throw GLError.uniformNotFound(uniform: name)
         }
         return location

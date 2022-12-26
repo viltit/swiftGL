@@ -26,8 +26,6 @@ enum GL {
     static let glCreateShader: @convention(c) (Int32) -> GLuint = loadGLFunction("glCreateShader")
     static let glDeleteShader: @convention(c) (GLuint) -> Void = loadGLFunction("glDeleteShader")
     static let glUseProgram: @convention(c) (GLuint) -> Void = loadGLFunction("glUseProgram")
-
-    // TODO: [CChar]? parameter probably does not work
     static let glShaderSource: @convention(c) 
          (GLuint, GLsizei, UnsafeMutablePointer<UnsafeMutablePointer<CChar>>?, UnsafePointer<GLint>?) -> ()
         = loadGLFunction("glShaderSource")
@@ -47,6 +45,17 @@ enum GL {
     /// set uniforms. ... https://manpages.ubuntu.com/manpages/focal/man3/glUniform2i.3G.html ...
     static let glGetUniformLocation: @convention(c) (GLuint, UnsafeMutablePointer<CChar>?) -> GLint = loadGLFunction("glGetUniformLocation")
     static let glUniform4f: @convention(c) (GLint, GLfloat, GLfloat, GLfloat, GLfloat) -> () = loadGLFunction("glUniform4f")
+
+    /// buffers
+    /// TODO: Does UnsafeMutableRawPointer work ??
+    static let glGenBuffers: @convention(c) (GLsizei, UnsafeMutablePointer<GLuint>) -> () = loadGLFunction("glGenBuffers")
+    static let glBindBuffer: @convention(c) (Int32, GLuint) -> () = loadGLFunction("glBindBuffer")
+    static let glCreateVertexArrays: @convention(c) (GLsizei, UnsafeMutablePointer<GLuint>) -> () = loadGLFunction("glCreateVertexArrays")
+    static let glBindVertexArray: @convention(c) (GLuint) -> () = loadGLFunction("glBindVertexArray")
+    static let glBufferData: @convention(c) (Int32, Int32, UnsafeRawPointer?, Int32) -> () = loadGLFunction("glBufferData")
+    static let glEnableVertexAttribArray: @convention(c) (GLuint) -> () = loadGLFunction("glEnableVertexAttribArray")
+    static let glVertexAttribPointer: @convention(c) (
+        GLuint, GLint, Int32, GLboolean, GLsizei, UnsafeRawPointer?) -> () = loadGLFunction("glVertexAttribPointer")
 }
 
 // TODO: This might get tedious ...

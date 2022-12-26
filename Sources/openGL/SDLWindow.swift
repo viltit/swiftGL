@@ -39,7 +39,7 @@ public class SDLWindow {
 
         print("Renderable window size: \(self.drawableSize.width) / \(self.drawableSize.height)")
 
-        glClearColor(1.0, 1.0, 0.0, 1.0)
+        glClearColor(0.0, 0.0, 0.0, 1.0)
         glViewport(0, 0, self.drawableSize.width, self.drawableSize.height);
         glEnable(UInt32(GL_DEPTH_TEST))
         glEnable(UInt32(GL_BLEND))

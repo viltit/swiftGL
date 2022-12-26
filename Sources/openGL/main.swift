@@ -16,14 +16,15 @@ else {
     print("SDL2 video was not initialized")
 }
 let window = try SDLWindow(
-    name: "SDL2 with Swift", 
+    name: "Hello GL", 
     frame: SDLWindow.Frame.centered(size: Size(width: 300, height: 300)), 
     options: [ .resizable ])
 
 
-
 let vertexShaderSource = """
 #version 400 core
+
+layout (location = 0) in vec3 v_pos;
 
 out vec4 fragColor;
 uniform vec4 inColor;
@@ -31,8 +32,8 @@ uniform vec4 inColor;
 const vec2 quad_vertices[4] = vec2[4]( vec2( -1.0, -1.0), vec2( 1.0, -1.0), vec2( -1.0, 1.0), vec2( 1.0, 1.0));
 void main()
 {
-    fragColor = vec4(inColor.r, inColor.g, clamp((quad_vertices[gl_VertexID]).x, -1.0, 1.0), 1.0);
-    gl_Position = vec4(quad_vertices[gl_VertexID], 0.0, 1.0);
+    fragColor = vec4(inColor.r, inColor.g, 0.0, 1.0);
+    gl_Position = vec4(v_pos, 1.0);
 }
 """
 
@@ -47,11 +48,14 @@ void main() {
 }
 """
 
-// TODO: First milestone: Use this shader when drawing and generate some pattern
+// TODO: First milestone: Use Triangle when drawing and generate some pattern
 do {
     let shader = try Shader(sourceVertexCode: vertexShaderSource, sourceFragmentCode: fragmentShaderSource)
 
-    gameLoop(shader: shader)
+    // TODO: wip
+    let triangle = Triangle()
+
+    gameLoop(shader: shader, triangle: triangle)
 
     print("SDL2 quits now")
     SDL2.quit()
@@ -64,7 +68,9 @@ catch GLError.shaderCompileError(let log) {
     print(log)
 }
 
-private func gameLoop(shader: Shader /*TODO: Much later, shaders should be bound to drawable game objects in a class [Scene] */) {
+private func gameLoop(
+    shader: Shader /*TODO: Much later, shaders should be bound to drawable game objects in a class [Scene] */,
+    triangle: Triangle) {
 
     var event = SDL_Event()
     var isRunning = true
@@ -94,11 +100,9 @@ private func gameLoop(shader: Shader /*TODO: Much later, shaders should be bound
             let time = Date().timeIntervalSince1970
             let green = (sin(time) / 2.0) + 0.5;
             let red = (cos(time) / 2.0) + 0.5;
-            // print(GLfloat(green))
             let uniform = try shader.uniform(name: "inColor")
-            print(uniform)
             GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
-            GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+            triangle.draw(shader: shader)
             shader.off()
         }
         catch GLError.uniformNotFound(let uniform) {
