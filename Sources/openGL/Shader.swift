@@ -45,8 +45,15 @@ final class Shader {
     }
 
     /// return an identifier to a shaders uniform variable
-    func uniform() -> GLint {
-        fatalError("Not yet implemented")
+    func uniform(name: String) throws -> GLint {
+        guard let namePtr = UnsafeMutablePointer(mutating: name.cString(using: String.Encoding.ascii)) else {
+            fatalError(/* TODO */)
+        }
+        let location = GL.glGetUniformLocation(programID, namePtr)
+        guard location != GL_INVALID_INDEX else {
+            throw GLError.uniformNotFound(uniform: name)
+        }
+        return location
     } 
 
     /// compile shader source code

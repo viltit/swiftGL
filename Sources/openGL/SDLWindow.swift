@@ -74,7 +74,10 @@ public class SDLWindow {
             return Size(width: width, height: height)
         }
         
-        set { SDL_SetWindowSize(windowPtr, newValue.width, newValue.height) }
+        set { 
+            // SDL_SetWindowSize(windowPtr, newValue.width, newValue.height)
+            glViewport(0, 0, newValue.width, newValue.height) 
+        }
     }
 
     /*  Size of a window's underlying drawable in pixels (for use with glViewport).

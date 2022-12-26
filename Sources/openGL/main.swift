@@ -6,6 +6,7 @@ https://swiftgl.github.io/
 // TODO: Imports from C should not be needed at this level -> wrap SDL_Event? Very tedious
 import CSDL2
 import CGL
+import Foundation
 
 try SDL2.start(subsystems: [ .video, .audio ] )
 if (SDL2.isInitialized(subsystems: .video)) {
@@ -24,9 +25,13 @@ let window = try SDLWindow(
 let vertexShaderSource = """
 #version 400 core
 
+out vec4 fragColor;
+uniform vec4 inColor;
+
 const vec2 quad_vertices[4] = vec2[4]( vec2( -1.0, -1.0), vec2( 1.0, -1.0), vec2( -1.0, 1.0), vec2( 1.0, 1.0));
 void main()
 {
+    fragColor = vec4(inColor.r, inColor.g, clamp((quad_vertices[gl_VertexID]).x, -1.0, 1.0), 1.0);
     gl_Position = vec4(quad_vertices[gl_VertexID], 0.0, 1.0);
 }
 """
@@ -34,10 +39,11 @@ void main()
 let fragmentShaderSource = """
 #version 400 core
 
+in      vec4    fragColor;
 out		vec4	color;
 
 void main() {
-	color = vec4(1, 0.5, 0.5, 1);
+	color = fragColor;
 }
 """
 
@@ -75,17 +81,32 @@ private func gameLoop(shader: Shader /*TODO: Much later, shaders should be bound
                 isRunning = false
             case SDL_WINDOWEVENT:
                 if event.window.event == UInt8(SDL_WINDOWEVENT_SIZE_CHANGED.rawValue) {
-                    // TODO: Refresh window with new size
+                    window.size = Size(width: event.window.data1, height: event.window.data2)
                 }
             // TODO: Keyboard event    
             default:
                 break
         }
 
-        shader.on()
-        GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
-        shader.off()
-
+        do {
+            // TODO: Completly wip, just show we can do *something*
+            shader.on()
+            let time = Date().timeIntervalSince1970
+            let green = (sin(time) / 2.0) + 0.5;
+            let red = (cos(time) / 2.0) + 0.5;
+            // print(GLfloat(green))
+            let uniform = try shader.uniform(name: "inColor")
+            print(uniform)
+            GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
+            GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+            shader.off()
+        }
+        catch GLError.uniformNotFound(let uniform) {
+            print("Could not find uniform named \(uniform)")
+        }
+        catch {
+            print(error)
+        }
         // TODO: Window needs a method to fetch displays native refresh rate (SDL_GetWindowDisplayMode)
         // TODO: Add timer and wait for next loop according to screens refresh rate
         window.swap()

@@ -43,12 +43,17 @@ enum GL {
 
     /// drawing commands
     static let glDrawArrays: @convention(c) (Int32, GLint, GLsizei) -> () = loadGLFunction("glDrawArrays")
+
+    /// set uniforms. ... https://manpages.ubuntu.com/manpages/focal/man3/glUniform2i.3G.html ...
+    static let glGetUniformLocation: @convention(c) (GLuint, UnsafeMutablePointer<CChar>?) -> GLint = loadGLFunction("glGetUniformLocation")
+    static let glUniform4f: @convention(c) (GLint, GLfloat, GLfloat, GLfloat, GLfloat) -> () = loadGLFunction("glUniform4f")
 }
 
 // TODO: This might get tedious ...
 enum GLError: Error {
     case failedToCreateShaderProgram
     case failedToCreateShader
+    case uniformNotFound(uniform: String /* TODO: Shader name ? */)
     case shaderCompileError(log: String)
     case shaderLinkingError(log: String)
 }
