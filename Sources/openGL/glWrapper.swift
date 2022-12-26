@@ -25,10 +25,26 @@ enum GL {
     static let glCreateShader: @convention(c) (Int32) -> GLuint = loadGLFunction("glCreateShader")
     static let glDeleteShader: @convention(c) (GLuint) -> Void = loadGLFunction("glDeleteShader")
     static let glUseProgram: @convention(c) (GLuint) -> Void = loadGLFunction("glUseProgram")
+
+    // TODO: [CChar]? parameter probably does not work
+    static let glShaderSource: @convention(c) 
+         (GLuint, GLsizei, UnsafeMutablePointer<UnsafeMutablePointer<CChar>>?, UnsafePointer<GLint>?) -> ()
+        = loadGLFunction("glShaderSource")
+    static let glCompileShader: @convention(c) (GLuint) -> Void = loadGLFunction("glCompileShader")
+    static let glGetShaderiv: @convention(c) (GLuint, Int32, UnsafeMutablePointer<GLint>) -> Void = loadGLFunction("glGetShaderiv")
+    static let glGetShaderInfoLog: @convention(c) (
+        GLuint, Int32, UnsafeMutablePointer<Int32>,  UnsafeMutablePointer<CChar>) -> Void = loadGLFunction("glGetShaderInfoLog")
+    static let glAttachShader: @convention(c) (GLuint, GLuint) -> Void = loadGLFunction("glAttachShader")
+    static let glLinkProgram: @convention(c) (GLuint) -> Void = loadGLFunction("glLinkProgram")
+    static let glGetProgramiv: @convention(c) (GLuint, Int32, UnsafeMutablePointer<GLint>) -> Void = loadGLFunction("glGetProgramiv")
+    static let glGetProgramInfoLog: @convention(c) (
+        GLuint, Int32, UnsafeMutablePointer<Int32>, UnsafeMutablePointer<CChar>) -> Void = loadGLFunction("glGetProgramInfoLog")
 }
 
 // TODO: This might get tedious ...
 enum GLError: Error {
     case failedToCreateShaderProgram
     case failedToCreateShader
+    case shaderCompileError(log: String)
+    case shaderLinkingError(log: String)
 }
