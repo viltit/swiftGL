@@ -5,7 +5,7 @@ https://swiftgl.github.io/
 
 // TODO: Imports from C should not be needed at this level -> wrap SDL_Event? Very tedious
 import CSDL2
-
+import CGL
 
 try SDL2.start(subsystems: [ .video, .audio ] )
 if (SDL2.isInitialized(subsystems: .video)) {
@@ -37,7 +37,7 @@ let fragmentShaderSource = """
 out		vec4	color;
 
 void main() {
-	color = vec4(1, 1, 1, 1);
+	color = vec4(1, 0.5, 0.5, 1);
 }
 """
 
@@ -45,7 +45,7 @@ void main() {
 do {
     let shader = try Shader(sourceVertexCode: vertexShaderSource, sourceFragmentCode: fragmentShaderSource)
 
-    gameLoop()
+    gameLoop(shader: shader)
 
     print("SDL2 quits now")
     SDL2.quit()
@@ -58,7 +58,7 @@ catch GLError.shaderCompileError(let log) {
     print(log)
 }
 
-private func gameLoop() {
+private func gameLoop(shader: Shader /*TODO: Much later, shaders should be bound to drawable game objects in a class [Scene] */) {
 
     var event = SDL_Event()
     var isRunning = true
@@ -81,6 +81,10 @@ private func gameLoop() {
             default:
                 break
         }
+
+        shader.on()
+        GL.glDrawArrays(GL_TRIANGLE_STRIP, 0, 4)
+        shader.off()
 
         // TODO: Window needs a method to fetch displays native refresh rate (SDL_GetWindowDisplayMode)
         // TODO: Add timer and wait for next loop according to screens refresh rate

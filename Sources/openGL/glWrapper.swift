@@ -19,6 +19,7 @@ func loadGLFunction<T>(_ name: String) -> T {
  TODO: This will get very tedious
 */
 enum GL {
+    /// Shaders
     static let glCreateProgram: @convention(c) () -> GLuint = loadGLFunction("glCreateProgram")
     static let glDeleteProgram: @convention(c) (GLuint) -> Void = loadGLFunction("glDeleteProgram")  
     // TODO: GL-Specification wants an GLEnum, but Swift needs an Int32 here ... 
@@ -39,6 +40,9 @@ enum GL {
     static let glGetProgramiv: @convention(c) (GLuint, Int32, UnsafeMutablePointer<GLint>) -> Void = loadGLFunction("glGetProgramiv")
     static let glGetProgramInfoLog: @convention(c) (
         GLuint, Int32, UnsafeMutablePointer<Int32>, UnsafeMutablePointer<CChar>) -> Void = loadGLFunction("glGetProgramInfoLog")
+
+    /// drawing commands
+    static let glDrawArrays: @convention(c) (Int32, GLint, GLsizei) -> () = loadGLFunction("glDrawArrays")
 }
 
 // TODO: This might get tedious ...
