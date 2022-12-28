@@ -45,10 +45,8 @@ final class Shader {
 
     /// return an identifier to a shaders uniform variable
     func uniform(name: String) throws -> GLint {
-        guard let namePtr = UnsafeMutablePointer(mutating: name.cString(using: String.Encoding.ascii)) else {
-            fatalError(/* TODO */)
-        }
-        let location = GL.glGetUniformLocation(programID, namePtr)
+        var cStr = name.cString(using: String.Encoding.ascii)
+        let location = GL.glGetUniformLocation(programID, cStr)
         guard location != -1 else {
             throw GLError.uniformNotFound(uniform: name, shaderName: name)
         }
@@ -59,7 +57,9 @@ final class Shader {
     private func compile(source code: String, shader id: GLuint) throws {
         
         // do weird casting from source code string to char** and compile shader
-        guard var codePtr = UnsafeMutablePointer(mutating: code.cString(using: String.Encoding.ascii)) else {
+        // TODO: Compiler warns of dangling pointer
+        var cStr = code.cString(using: String.Encoding.ascii)
+        guard var codePtr = UnsafeMutablePointer(mutating: cStr) else {
             fatalError(/* TODO */)
         }
         GL.glShaderSource(id, 1, &codePtr, nil)
@@ -74,10 +74,9 @@ final class Shader {
             
             var length: GLint = 0
             GL.glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length)
-            let logCharPtr = UnsafeMutablePointer(mutating: [ CChar ](repeating: 0, count: Int(length)))
-            GL.glGetShaderInfoLog(id, length, &length, logCharPtr)
-
-            throw GLError.shaderCompileError(log: String(cString: logCharPtr), shaderName: name)
+            var buffer = [ CChar ](repeating: 0, count: Int(length))
+            GL.glGetShaderInfoLog(id, length, &length, &buffer)
+            throw GLError.shaderCompileError(log: String(cString: buffer), shaderName: name)
         }
     }
 
@@ -97,10 +96,9 @@ final class Shader {
             
             var length: GLint = 0
             GL.glGetProgramiv(programID, GL_INFO_LOG_LENGTH, &length)
-            let logCharPtr = UnsafeMutablePointer(mutating: [ CChar ](repeating: 0, count: Int(length)))
-            GL.glGetProgramInfoLog(programID, length, &length, logCharPtr)
-            
-            throw GLError.shaderLinkingError(log: String(cString: logCharPtr), shaderName: name)  
+            var buffer = [ CChar ](repeating: 0, count: Int(length))
+            GL.glGetProgramInfoLog(programID, length, &length, &buffer)
+            throw GLError.shaderLinkingError(log: String(cString: buffer), shaderName: name)  
         }
     }
 }

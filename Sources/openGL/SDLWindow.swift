@@ -22,6 +22,9 @@ public class SDLWindow {
             windowOptions.insert(.fullscreen)
         }
 
+        // TODO: Parameterize number of samples 
+        SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+
          self.windowPtr = try SDL_CreateWindow(
             name, 
             frame.x,
@@ -44,6 +47,7 @@ public class SDLWindow {
         glEnable(UInt32(GL_DEPTH_TEST))
         glEnable(UInt32(GL_BLEND))
         glEnable(UInt32(GL_CULL_FACE))
+        glEnable(UInt32(GL_MULTISAMPLE)); 
         glCullFace(UInt32(GL_BACK));
     }
 
