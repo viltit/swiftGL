@@ -6,6 +6,7 @@ https://swiftgl.github.io/
 // TODO: Imports from C should not be needed at this level -> wrap SDL_Event? Very tedious
 import CSDL2
 import CGL
+import SGLMath
 import Foundation
 
 try SDL2.start(subsystems: [ .video, .audio ] )
@@ -28,12 +29,13 @@ layout (location = 0) in vec3 v_pos;
 
 out vec4 fragColor;
 uniform vec4 inColor;
+uniform mat4 C; 
 uniform mat4 M;
 
 void main()
 {
     fragColor = vec4(inColor.r, inColor.g, 0.0, 1.0);
-    gl_Position = M * vec4(v_pos, 1.0);
+    gl_Position = M * C * vec4(v_pos, 1.0);
 }
 """
 
@@ -56,7 +58,10 @@ do {
 
     let triangle = Triangle()
 
-    gameLoop(shader: shader, triangle: triangle)
+    // TODO: window.size or window.drawableSize 
+    let camera = Camera2D(windowSize: window.size, position: vec3(0, 0, -1))
+
+    gameLoop(shader: shader, triangle: triangle, camera: camera)
 
     print("SDL2 quits now")
     SDL2.quit()
@@ -71,7 +76,8 @@ catch GLError.shaderCompileError(let log, let shaderName) {
 
 private func gameLoop(
     shader: Shader /*TODO: Much later, shaders should be bound to drawable game objects in a class [Scene] */,
-    triangle: Triangle) {
+    triangle: Triangle,
+    camera: Camera2D) {
 
     var event = SDL_Event()
     var isRunning = true
@@ -95,9 +101,13 @@ private func gameLoop(
                     case Int32(SDLK_ESCAPE):    // TODO: And another ugly cast
                         isRunning = false
                     case Int32(SDLK_a):
-                        triangle.rotate(angle: 0.1)
+                        camera.move(along: vec3(-1, 0, 0))
                     case Int32(SDLK_d):
-                        triangle.rotate(angle: -0.1)
+                        camera.move(along: vec3(1, 0, 0))
+                    case Int32(SDLK_w):
+                        camera.move(along: vec3(0, -1, 0))
+                    case Int32(SDLK_s):
+                        camera.move(along: vec3(0, 1, 0))
                 default:
                     break
                 }
@@ -107,8 +117,21 @@ private func gameLoop(
 
         do {
             shader.on()
+            camera.update()
+            let cameraUniform = try shader.uniform(name: "C")
+            let camPos = camera.position
+            let identity = mat4()
+            let m = SGLMath.translate(identity, camPos)
+             withUnsafeBytes(of: m) { rawBuffer in
+                let buffer = UnsafeBufferPointer(start: rawBuffer.baseAddress!.assumingMemoryBound(to: Float.self), count: 4 * 4)
+                GL.glUniformMatrix4fv(cameraUniform, 1,  GLboolean(GL_FALSE), buffer.baseAddress)
+            }
+            // print(camera.matrix)
             triangle.draw(shader: shader)
             shader.off()
+        }
+        catch {
+            print(error)
         }
 
         // TODO: Window needs a method to fetch displays native refresh rate (SDL_GetWindowDisplayMode)

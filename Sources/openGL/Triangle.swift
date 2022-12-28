@@ -55,7 +55,6 @@ class Triangle {
 
     func draw(shader: Shader) {
         do {
-            print("Drawing triangle")
             // wip, just to test: Set a color
             let time = Date().timeIntervalSince1970
             let green = (sin(time) / 2.0) + 0.5;
