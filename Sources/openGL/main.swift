@@ -35,7 +35,7 @@ uniform mat4 M;
 void main()
 {
     fragColor = vec4(inColor.r, inColor.g, 0.0, 1.0);
-    gl_Position = M * C * vec4(v_pos, 1.0);
+    gl_Position = C * M * vec4(v_pos, 1.0);
 }
 """
 
@@ -87,41 +87,51 @@ private func gameLoop(
         window.clear()
         
         // TODO: How can we avoid accessing CSDL directly ?
-        SDL_PollEvent(&event)
-        switch SDL_EventType(rawValue: event.type) {
-            case SDL_QUIT, SDL_APP_TERMINATING:
-                isRunning = false
-            case SDL_WINDOWEVENT:
-                if event.window.event == UInt8(SDL_WINDOWEVENT_SIZE_CHANGED.rawValue) {
-                    window.size = Size(width: event.window.data1, height: event.window.data2)
-                } 
-            // Keyboard events, TODO: Handle in its own class
-            case SDL_KEYDOWN:
-                switch(event.key.keysym.sym) {
-                    case Int32(SDLK_ESCAPE):    // TODO: And another ugly cast
-                        isRunning = false
-                    case Int32(SDLK_a):
-                        camera.move(along: vec3(-1, 0, 0))
-                    case Int32(SDLK_d):
-                        camera.move(along: vec3(1, 0, 0))
-                    case Int32(SDLK_w):
-                        camera.move(along: vec3(0, -1, 0))
-                    case Int32(SDLK_s):
-                        camera.move(along: vec3(0, 1, 0))
+        while SDL_PollEvent(&event) == 1 {
+            switch SDL_EventType(rawValue: event.type) {
+                case SDL_QUIT, SDL_APP_TERMINATING:
+                    isRunning = false
+                case SDL_WINDOWEVENT:
+                    if event.window.event == UInt8(SDL_WINDOWEVENT_SIZE_CHANGED.rawValue) {
+                        window.size = Size(width: event.window.data1, height: event.window.data2)
+                        camera.resize(windowSize: Size(width: Int(event.window.data1), height: Int(event.window.data2)))
+                    } 
+                // Keyboard events, TODO: Handle in its own class
+                case SDL_KEYDOWN:
+                    switch(event.key.keysym.sym) {
+                        case Int32(SDLK_ESCAPE):    // TODO: And another ugly cast
+                            isRunning = false
+                        case Int32(SDLK_a):
+                            camera.move(along: vec3(5, 0, 0))
+                        case Int32(SDLK_d):
+                            camera.move(along: vec3(-5, 0, 0))
+                        case Int32(SDLK_w):
+                            camera.move(along: vec3(0, -5, 0))
+                        case Int32(SDLK_s):
+                            camera.move(along: vec3(0, 5, 0))
+                    default:
+                        break
+                    }
+                case SDL_MOUSEWHEEL:
+                    if event.wheel.y > 0 {
+                        camera.zoom(delta: 0.1)
+                    }
+                    else if event.wheel.y < 0 {
+                        camera.zoom(delta: -0.1)
+                    }
                 default:
                     break
-                }
-            default:
-                break
+            }
         }
 
         do {
             shader.on()
             camera.update()
+
+            // TODO: Camera view matrix works, but cameras ortho matrix seems bugged
+
             let cameraUniform = try shader.uniform(name: "C")
-            let camPos = camera.position
-            let identity = mat4()
-            let m = SGLMath.translate(identity, camPos)
+            let m = camera.matrix
              withUnsafeBytes(of: m) { rawBuffer in
                 let buffer = UnsafeBufferPointer(start: rawBuffer.baseAddress!.assumingMemoryBound(to: Float.self), count: 4 * 4)
                 GL.glUniformMatrix4fv(cameraUniform, 1,  GLboolean(GL_FALSE), buffer.baseAddress)

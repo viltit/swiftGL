@@ -2,18 +2,21 @@ import SGLMath
 
 /**
     Very basic 2-d camera 
+    TODO: More getters and setters (zoomMin, sensitivity, ...)
+    TODO: Smooth movement by storing a deltaPos and in every update decrease deltaPos
 */
 class Camera2D {
 
     private var pos: vec3
     private var rotation: Float = 0
-    private var zoom: Float = 100
+    private var zoom: Float = 1
+    private var zoomMin: Float = 0.1
     private var sensitivity: Float = 0.5
 
     /// orthografix matrix, changes when window aspect changes
-    private var O: mat4
+    var O: mat4
     /// view matrix, changes when cameras zoom or position changes
-    private var V: mat4   
+    var V: mat4   
 
     /// getters and setters
     var matrix: mat4 {
@@ -35,7 +38,10 @@ class Camera2D {
     init(windowSize: Size<Int32>, position: vec3) {
 
         self.pos = position
-        O = SGLMath.ortho(Float(0), Float(windowSize.width), Float(windowSize.height), Float(0))
+        O = SGLMath.ortho(
+            -Float(windowSize.width) / 2.0, Float(windowSize.width) / 2.0, 
+            -Float(windowSize.height) / 2.0, Float(windowSize.height) / 2.0, 
+            Float(-100), Float(100))   // TODO: Good values for near and far plane ??
         V = mat4()
     }
 
@@ -47,8 +53,8 @@ class Camera2D {
         // fraction of it again
 
         V = mat4()
-    //    V = SGLMath.translate(V, pos)
-    //    V = SGLMath.scale(V, vec3(zoom, zoom, zoom))
+        V = SGLMath.translate(V, pos)
+        V = SGLMath.scale(V, vec3(zoom, zoom, zoom))
         // TODO: Rotate camera ??
     }
 
@@ -56,8 +62,20 @@ class Camera2D {
         pos += vector
     }
 
+    // TODO: Also add a zoomMax
+    func zoom(delta: Float) {
+        zoom = (zoom + delta < zoomMin) ? zoomMin : zoom + delta
+        print("Delta: \(delta)")
+        print("Zoom: \(zoom)")
+    }
+
     /// call when window is resized. Missing to call this function will result in distorted geometries
+    /// TODO: This lead to a bigger/smaller visible scene on screen change
+    /// TODO: Just use the window aspect to keep geometries, but otherwise used fixed widht and height
     func resize(windowSize: Size<Int>) {
-        O = SGLMath.ortho(Float(0), Float(windowSize.width), Float(windowSize.height), Float(0), Float(0.001), Float(100))
+        O = SGLMath.ortho(
+            -Float(windowSize.width) / 2.0, Float(windowSize.width) / 2.0, 
+            -Float(windowSize.height) / 2.0, Float(windowSize.height) / 2.0, 
+            Float(-100), Float(100))   // TODO: Good values for near and far plane ??
     }
 }

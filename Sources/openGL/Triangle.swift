@@ -19,9 +19,9 @@ class Triangle {
         // TODO: Use a struct [Vertex] that also has colors
         // TODO advanced: Make a struct/protocol [Vertex] that can or can not have additional fields 
         var vertices: [ Float ] = [
-        -0.5, -0.5, 0.0,
-        0.5, -0.5, 0.0,
-        0.0,  0.5, 0.0
+        -100, -100, 0.0,
+        100, -100, 0.0,
+        0.0,  100, 0.0
         ]
         numVertices = 3
     
