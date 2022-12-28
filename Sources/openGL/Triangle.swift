@@ -2,13 +2,17 @@
 // TODO much later: Base class/ protocol [GLDrawable] ? 
 import CGL
 import Foundation
+import SGLMath
 
-struct Triangle {
+class Triangle {
 
     /// vertex buffer object, holds the geometry (but could also hold uv-coordinates for textures)
     var vbo: GLuint = 0
     var vao: GLuint = 0
     let numVertices: GLsizei
+
+    // TODO later: Dedicated class / struct [ Transformation ] with methods to rotate, move, scale etc. 
+    var modelMatrix = mat4() 
 
     init() {
 
@@ -44,15 +48,29 @@ struct Triangle {
         GL.glBindVertexArray(0);
     }
 
+    // TODO: Each drawable shape should have a component [ Transform ]
+    func rotate(angle: Float) {
+        modelMatrix = SGLMath.rotate(modelMatrix, angle, Vector3(0, 0, 1))
+    }
+
     func draw(shader: Shader) {
         do {
             print("Drawing triangle")
-            // TODO: use a model matrix for position and scale and push it to the shader
+            // wip, just to test: Set a color
             let time = Date().timeIntervalSince1970
             let green = (sin(time) / 2.0) + 0.5;
             let red = (cos(time) / 2.0) + 0.5;
             let uniform = try shader.uniform(name: "inColor")
             GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
+
+            // set model matrix
+            let modelUniform = try shader.uniform(name: "M")
+            // TODO: This construction sucks ...
+            withUnsafeBytes(of: modelMatrix) { rawBuffer in
+                let buffer = UnsafeBufferPointer(start: rawBuffer.baseAddress!.assumingMemoryBound(to: Float.self), count: 4 * 4)
+                GL.glUniformMatrix4fv(modelUniform, 1,  GLboolean(GL_FALSE), buffer.baseAddress)
+            }
+
             // draw...
             // TODO Advanced: Draw same gemoetry with different model matrices at the same time
             GL.glBindVertexArray(vao);

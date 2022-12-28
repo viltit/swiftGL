@@ -28,12 +28,12 @@ layout (location = 0) in vec3 v_pos;
 
 out vec4 fragColor;
 uniform vec4 inColor;
+uniform mat4 M;
 
-const vec2 quad_vertices[4] = vec2[4]( vec2( -1.0, -1.0), vec2( 1.0, -1.0), vec2( -1.0, 1.0), vec2( 1.0, 1.0));
 void main()
 {
     fragColor = vec4(inColor.r, inColor.g, 0.0, 1.0);
-    gl_Position = vec4(v_pos, 1.0);
+    gl_Position = M * vec4(v_pos, 1.0);
 }
 """
 
@@ -94,7 +94,10 @@ private func gameLoop(
                 switch(event.key.keysym.sym) {
                     case Int32(SDLK_ESCAPE):    // TODO: And another ugly cast
                         isRunning = false
-				break;
+                    case Int32(SDLK_a):
+                        triangle.rotate(angle: 0.1)
+                    case Int32(SDLK_d):
+                        triangle.rotate(angle: -0.1)
                 default:
                     break
                 }

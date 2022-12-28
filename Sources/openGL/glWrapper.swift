@@ -45,6 +45,7 @@ enum GL {
     /// set uniforms. ... https://manpages.ubuntu.com/manpages/focal/man3/glUniform2i.3G.html ...
     static let glGetUniformLocation: @convention(c) (GLuint, UnsafeMutablePointer<CChar>?) -> GLint = loadGLFunction("glGetUniformLocation")
     static let glUniform4f: @convention(c) (GLint, GLfloat, GLfloat, GLfloat, GLfloat) -> () = loadGLFunction("glUniform4f")
+    static let glUniformMatrix4fv: @convention(c) (GLint, GLsizei, GLboolean, UnsafePointer<Float>?) -> () = loadGLFunction("glUniformMatrix4fv")
 
     /// buffers
     /// TODO: Does UnsafeMutableRawPointer work ??
