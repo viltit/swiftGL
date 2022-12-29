@@ -56,12 +56,20 @@ do {
         sourceVertexCode: vertexShaderSource, 
         sourceFragmentCode: fragmentShaderSource)
 
-    let triangle = Triangle()
+    let triangles: [ DrawableGL ] = (0..<100).map { index in
+        let x = Float(index / 10) * 300
+        let y = Float(index % 10) * 300
+        return Triangle(position: vec3(x, y, 0))
+    }
 
     // TODO: window.size or window.drawableSize 
     let camera = Camera2D(windowSize: window.size, position: vec3(0, 0, -1))
 
-    gameLoop(shader: shader, triangle: triangle, camera: camera)
+    // TODO: Async drawing loop? 
+    gameLoop(
+        shader: shader, 
+        drawables: triangles, 
+        camera: camera)
 
     print("SDL2 quits now")
     SDL2.quit()
@@ -76,7 +84,7 @@ catch GLError.shaderCompileError(let log, let shaderName) {
 
 private func gameLoop(
     shader: Shader /*TODO: Much later, shaders should be bound to drawable game objects in a class [Scene] */,
-    triangle: Triangle,
+    drawables: [ DrawableGL ],
     camera: Camera2D) {
 
     var event = SDL_Event()
@@ -128,24 +136,27 @@ private func gameLoop(
             shader.on()
             camera.update()
 
-            // TODO: Camera view matrix works, but cameras ortho matrix seems bugged
-
             let cameraUniform = try shader.uniform(name: "C")
             let m = camera.matrix
-             withUnsafeBytes(of: m) { rawBuffer in
+            withUnsafeBytes(of: m) { rawBuffer in
                 let buffer = UnsafeBufferPointer(start: rawBuffer.baseAddress!.assumingMemoryBound(to: Float.self), count: 4 * 4)
                 GL.glUniformMatrix4fv(cameraUniform, 1,  GLboolean(GL_FALSE), buffer.baseAddress)
             }
-            // print(camera.matrix)
-            triangle.draw(shader: shader)
+            // TODO: Draw several objects at once with instanced drawing
+            drawables.forEach {
+                $0.draw(shader: shader)
+            }
             shader.off()
         }
         catch {
             print(error)
         }
 
+        // TODO: Log errors? May produce overhead to fetch errors each frame 
+        assert(glGetError() == 0)
+
         // TODO: Window needs a method to fetch displays native refresh rate (SDL_GetWindowDisplayMode)
-        // TODO: Add timer and wait for next loop according to screens refresh rate
+        // TODO: Add timer and wait for next loop according to screens refresh rate?
         window.swap()
     }
 }

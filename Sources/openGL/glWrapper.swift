@@ -61,6 +61,7 @@ enum GL {
 
 // TODO: This might get tedious ...
 enum GLError: Error {
+    case failedToCreateBuffer
     case failedToCreateShaderProgram
     case failedToCreateShader
     case uniformNotFound(uniform: String, shaderName: String)
