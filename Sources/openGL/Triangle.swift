@@ -6,14 +6,14 @@ import SGLMath
 
 class Triangle : DrawableGLCommon { 
 
-    init(position: vec3 = vec3()) {
+    init(position: vec3 = vec3(), color: vec4 = vec4(1, 1, 1, 1)) {
 
         // TODO: Use a struct [Vertex] that also has colors
         // TODO advanced: Make a struct/protocol [Vertex] that can or can not have additional fields 
         var vertices: [ Vertex ] = [
-            Vertex(position: vec3(-100, -100, 0.0)),
-            Vertex(position: vec3(100, -100, 0.0)),
-            Vertex(position: vec3(0.0,  100, 0.0))
+            Vertex(position: vec3(-100, -100, 0.0), color: color),
+            Vertex(position: vec3(100, -100, 0.0), color: color),
+            Vertex(position: vec3(0.0,  100, 0.0), color: color)
         ]
         super.init(vertices: &vertices)
         transform.position = position
@@ -21,13 +21,6 @@ class Triangle : DrawableGLCommon {
 
     override func draw(shader: Shader) {
         do {
-            // wip, just to test: Set a color
-            let time = Date().timeIntervalSince1970
-            let green = (sin(time) / 2.0) + 0.5;
-            let red = (cos(time) / 2.0) + 0.5;
-            let uniform = try shader.uniform(name: "inColor")
-            GL.glUniform4f(uniform, GLfloat(red), GLfloat(green), 0.0, 1.0)
-
             // set model matrix
             let modelUniform = try shader.uniform(name: "M")
             // TODO: This construction sucks ...

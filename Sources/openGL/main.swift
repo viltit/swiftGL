@@ -26,15 +26,15 @@ let vertexShaderSource = """
 #version 400 core
 
 layout (location = 0) in vec3 v_pos;
+layout (location = 1) in vec4 v_color;
 
 out vec4 fragColor;
-uniform vec4 inColor;
 uniform mat4 C; 
 uniform mat4 M;
 
 void main()
 {
-    fragColor = vec4(inColor.r, inColor.g, 0.0, 1.0);
+    fragColor = v_color;
     gl_Position = C * M * vec4(v_pos, 1.0);
 }
 """
@@ -56,10 +56,20 @@ do {
         sourceVertexCode: vertexShaderSource, 
         sourceFragmentCode: fragmentShaderSource)
 
-    let triangles: [ DrawableGL ] = (0..<100).map { index in
-        let x = Float(index / 10) * 300
-        let y = Float(index % 10) * 300
-        return Triangle(position: vec3(x, y, 0))
+    // create 2500 triangles. Sadly, we will draw each one individually (yet)
+    let triangles: [ DrawableGL ] = (0..<2500).map { index in
+        
+        let x = Float(index / 50) * 300 - 7500
+        let y = Float(index % 50) * 300 - 7500
+        let r = Float.random(in: 0...1)
+        let g = Float.random(in: 0...1)
+        let b = Float.random(in: 0...1)
+        let triangle = Triangle(position: vec3(x, y, 0), color: vec4(r, g, b, 1))
+        let scale = Float.random(in: 0.2...1.5)
+        let rotation = Float.random(in: 0...360)
+        triangle.transform.scale = vec3(scale, scale, scale)
+        triangle.transform.rotate = rotation
+        return triangle
     }
 
     // TODO: window.size or window.drawableSize 

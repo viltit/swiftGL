@@ -24,7 +24,7 @@ class Transform2D {
             return _scale 
         }
         set(value) {
-            scale = value 
+            _scale = value 
         }
     }
 

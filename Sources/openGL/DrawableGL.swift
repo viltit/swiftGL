@@ -6,6 +6,7 @@ import SGLMath
 // TODO: Or an enum vertex that can hold different kinds 
 struct Vertex {
     let position: vec3
+    let color: vec4
 }
 
 protocol DrawableGL {
@@ -46,6 +47,11 @@ class DrawableGLCommon : DrawableGL {
         GL.glBufferData(GL_ARRAY_BUFFER, Int32(vertices.count * MemoryLayout<Vertex>.size), &vertices, GL_STATIC_DRAW)
         GL.glEnableVertexAttribArray(0)
         GL.glVertexAttribPointer(0, 3, GL_FLOAT, GLboolean(GL_FALSE), Int32(MemoryLayout<Vertex>.size), nil)
+        GL.glEnableVertexAttribArray(1)
+        // TODO:  We need a clean method to get a byte offset of a field in a struct
+        // TODO: This does not work: let colorOffset = MemoryLayout<Vertex>.offset(of: \.color)!
+        let colorOffset =  UnsafeRawPointer(bitPattern: 12)
+        GL.glVertexAttribPointer(1, 4, GL_FLOAT, GLboolean(GL_FALSE), Int32(MemoryLayout<Vertex>.size), colorOffset)
         GL.glBindBuffer(GL_ARRAY_BUFFER, 0)
         GL.glBindVertexArray(0)
     }
