@@ -42,13 +42,16 @@ public class SDLWindow {
 
         print("Renderable window size: \(self.drawableSize.width) / \(self.drawableSize.height)")
 
+        // TODO: Parameterize settings, ie some Struct GLSettings
         glClearColor(0.0, 0.0, 0.0, 1.0)
         glViewport(0, 0, self.drawableSize.width, self.drawableSize.height);
         glEnable(UInt32(GL_DEPTH_TEST))
         glEnable(UInt32(GL_BLEND))
+        glBlendFunc(UInt32(GL_SRC_ALPHA), UInt32(GL_ONE_MINUS_SRC_ALPHA))
         glEnable(UInt32(GL_CULL_FACE))
-        glEnable(UInt32(GL_MULTISAMPLE)); 
-        glCullFace(UInt32(GL_BACK));
+        glCullFace(UInt32(GL_BACK))
+        glEnable(UInt32(GL_MULTISAMPLE)) 
+
     }
 
     /**

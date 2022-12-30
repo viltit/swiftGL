@@ -61,15 +61,18 @@ do {
         
         let x = Float(index / 50) * 300 - 7500
         let y = Float(index % 50) * 300 - 7500
+        let z = Float.random(in: -1...1)
         let r = Float.random(in: 0...1)
         let g = Float.random(in: 0...1)
         let b = Float.random(in: 0...1)
-        let triangle = Triangle(position: vec3(x, y, 0), color: vec4(r, g, b, 1))
+        let a = Float.random(in: 0.2...1)
+        let shape: DrawableGL = (index % 2 == 1) ?  Rectangle2D(position: vec3(x, y, z), color: vec4(r, g, b, a)) 
+            : Triangle(position: vec3(x, y, z), color: vec4(r, g, b, a))
         let scale = Float.random(in: 0.2...1.5)
         let rotation = Float.random(in: 0...360)
-        triangle.transform.scale = vec3(scale, scale, scale)
-        triangle.transform.rotate = rotation
-        return triangle
+        shape.transform.scale = vec3(scale, scale, scale)
+        shape.transform.rotate = rotation
+        return shape
     }
 
     // TODO: window.size or window.drawableSize 
